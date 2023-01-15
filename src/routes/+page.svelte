@@ -65,6 +65,8 @@
 
 	let minimalMode: boolean = browser && browser && localStorage.getItem('minimalMode') === 'true';
 	$: browser && localStorage.setItem('minimalMode', minimalMode.toString());
+
+	let mobile = browser && window.matchMedia('(max-width: 768px)').matches;
 </script>
 
 <div class="container">
@@ -80,7 +82,9 @@
 					<input type="range" min="0" max="1" step="0.01" bind:value={volume} />
 				</div>
 
-				<Switch bind:checked={minimalMode} />
+				{#if !mobile}
+					<Switch bind:checked={minimalMode} />
+				{/if}
 			</div>
 		</div>
 
@@ -101,7 +105,7 @@
 			{/each}
 		</div>
 
-		<div class="sounds" class:minimal={minimalMode}>
+		<div class="sounds" class:minimal={mobile || minimalMode}>
 			{#each sounds as sound}
 				{#if minimalMode}
 					<div
@@ -175,6 +179,12 @@
 		padding: 64px;
 	}
 
+	@media (max-width: 768px) {
+		main {
+			padding: 32px;
+		}
+	}
+
 	.search-bar-container {
 		width: 100%;
 		display: flex;
@@ -241,6 +251,16 @@
 	}
 
 	.sounds.minimal {
+		width: calc(min(100vw, 1280px) - 128px);
+	}
+
+	@media (max-width: 768px) {
+		.sounds.minimal {
+			width: calc(min(100vw, 1280px) - 64px);
+		}
+	}
+
+	.sounds.minimal {
 		margin-top: 32px;
 		flex-direction: column;
 		gap: 8px;
@@ -291,6 +311,10 @@
 	.sound-name {
 		color: hsl(220, 25%, 70%);
 		user-select: all;
+		max-width: 100%;
+		overflow: hidden;
+		text-overflow: ellipsis;
+		white-space: nowrap;
 	}
 
 	.sound-name.active {
