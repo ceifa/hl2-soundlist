@@ -1,0 +1,3 @@
+[submodule "hl2"]
+	path = static/hl2
+	url = https://github.com/sourcesounds/hl2
