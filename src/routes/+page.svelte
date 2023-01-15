@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { browser } from '$app/environment';
 	import Switch from '../Switch.svelte';
 
 	export let data: { sounds: string[] };
@@ -57,7 +58,13 @@
 		}
 	};
 
-	let minimalMode: boolean = false;
+	let volume: number = (browser && Number(localStorage.getItem('volume'))) || 0.75;
+	$: browser && localStorage.setItem('volume', volume.toString());
+
+	$: if (playingAudio) playingAudio.volume = volume;
+
+	let minimalMode: boolean = browser && browser && localStorage.getItem('minimalMode') === 'true';
+	$: browser && localStorage.setItem('minimalMode', minimalMode.toString());
 </script>
 
 <div class="container">
@@ -68,7 +75,11 @@
 					Made with ❤️
 				</a>
 			</div>
-			<div>
+			<div class="config">
+				<div class="volume-bar">
+					<input type="range" min="0" max="1" step="0.01" bind:value={volume} />
+				</div>
+
 				<Switch bind:checked={minimalMode} />
 			</div>
 		</div>
@@ -101,10 +112,14 @@
 						{sound}
 					</div>
 				{:else}
-					<button class="sound-container" on:click={() => playSound(sound)}>
-						<div class="play-button" class:active={playingAudio?.src.includes(sound)} />
+					<div class="sound-container">
+						<button
+							on:click={() => playSound(sound)}
+							class="play-button"
+							class:active={playingAudio?.src.includes(sound)}
+						/>
 						<div class="sound-name">{sound}</div>
-					</button>
+					</div>
 				{/if}
 			{/each}
 		</div>
@@ -117,12 +132,33 @@
 	.header {
 		display: flex;
 		justify-content: space-between;
+		align-items: center;
 		margin-bottom: 16px;
 	}
 
 	.github a {
 		text-decoration: none;
 		color: hsl(220, 25%, 70%);
+	}
+
+	.config {
+		display: flex;
+		align-items: center;
+	}
+
+	.volume-bar {
+		margin-right: 16px;
+	}
+
+	.volume-bar input {
+		width: 100px;
+		height: 4px;
+		border-radius: 2px;
+		background: hsl(220, 25%, 10%);
+		outline: none;
+		opacity: 0.7;
+		-webkit-transition: 0.2s;
+		transition: opacity 0.2s;
 	}
 
 	.container {
@@ -217,7 +253,6 @@
 		align-items: center;
 		background: none;
 		border: 0;
-		cursor: pointer;
 		width: 30%;
 	}
 
@@ -228,6 +263,7 @@
 		width: 64px;
 		border-radius: 1000px;
 		margin-bottom: 16px;
+		cursor: pointer;
 	}
 
 	.play-button::before {
@@ -239,7 +275,7 @@
 		border-bottom: 12px solid transparent;
 		border-left: 18px solid hsl(220, 25%, 70%);
 		margin-left: calc(50% - 6px);
-		margin-top: calc(50% - 12px);
+		margin-top: calc(50% - 24px);
 	}
 
 	.play-button.active::before {
@@ -247,13 +283,14 @@
 	}
 
 	.play-button.active,
-	.sound-container:hover .play-button {
+	.play-button:hover {
 		background-color: #0a0c10;
 		outline: 1px solid hsl(220, 25%, 50%, calc(100% / 3));
 	}
 
 	.sound-name {
 		color: hsl(220, 25%, 70%);
+		user-select: all;
 	}
 
 	.sound-name.active {
