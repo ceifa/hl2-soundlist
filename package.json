@@ -12,6 +12,7 @@
 		"format": "prettier --plugin-search-dir . --write ."
 	},
 	"devDependencies": {
+		"@sveltejs/adapter-cloudflare": "^2.2.4",
 		"@sveltejs/adapter-vercel": "^1.0.0",
 		"@sveltejs/kit": "^1.0.0",
 		"prettier": "^2.8.0",
